@@ -7,6 +7,7 @@ from sqlalchemy.types import Date
 from sqlalchemy.sql.expression import and_, extract
 from flask import Flask, jsonify
 
+
 base = declarative_base()
 
 class Measurement(base):
@@ -50,11 +51,15 @@ def precipitation():
     return jsonify(prcp_dict)
 
 
+@app.route("/api/v1.0/stations")
+def stations():
+    station = session.query(Measurement.station, 
+    func.count(Measurement.id))\
+    .group_by(Measurement.station)\
+    .order_by(func.count(Measurement.station).desc()).all()
 
-
-
-# @app.route("/api/v1.0/stations")
-
+    station_dict = dict(station)
+    return jsonify(station_dict)
 
 
 # @app.route("/api/v1.0/tobs")
