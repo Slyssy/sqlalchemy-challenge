@@ -9,6 +9,7 @@ verify_ssl = true
 flask = "*"
 psycopg2-binary = "*"
 sqlalchemy = "*"
+numpy = "*"
 
 [requires]
 python_version = "3.9"

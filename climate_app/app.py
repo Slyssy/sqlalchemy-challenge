@@ -6,6 +6,7 @@ from sqlalchemy import Column, Integer, String, Float
 from sqlalchemy.types import Date
 from sqlalchemy.sql.expression import and_, extract
 from flask import Flask, jsonify
+import numpy as np
 
 
 base = declarative_base()
@@ -54,10 +55,11 @@ def precipitation():
     .filter(Measurement.date <= "2017-08-23")\
     .order_by(Measurement.date).all()
     
-    prcp_dict = dict(prcp)
+    # prcp_dict = dict(prcp)
+    prcp_dict = {date: precipitation for date, precipitation in prcp}
     return jsonify(prcp_dict)
 
-
+# Returns a JSON of the most active stations.
 @app.route("/api/v1.0/stations")
 def stations():
     station = session.query(Measurement.station, 
@@ -68,7 +70,7 @@ def stations():
     station_dict = dict(station)
     return jsonify(station_dict)
 
-
+# Return a JSON list of temperature observations (TOBS) for the previous year.
 @app.route("/api/v1.0/tobs")
 def tobs():
     temp_obs = session.query(Measurement.station, func.count(Measurement.tobs))\
@@ -77,6 +79,14 @@ def tobs():
 
     tobs_dict = dict(temp_obs)
     return jsonify(tobs_dict)
+
+@app.route("/api/v1.0/temps/<start>")
+def temp_start(start=None):
+    start_temps = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
+    filter(Measurement.date >= start).all()
+
+    start_temps = list(np.ravel(start_temps))
+    return jsonify(start_temps)
     
 
 
