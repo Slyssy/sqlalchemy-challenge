@@ -38,7 +38,14 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "Welcome to my Hawaii Climate App"
+    return (
+        f"<h1>Welcome to Stephen Lyssy's Hawaii Climate App</h1><br/><br/>"
+        f"<h2> Below is a list of available routes<h2><br/>"
+        """<a href="/api/v1.0/stations">/api/v1.0/stations (List of stations)</a><br/>"""
+        """<a href="/api/v1.0/tobs">/api/v1.0/tobs (Temperature observations for the previous year)</a><br/>"""
+        """<a href="/api/v1.0/precipitation">/api/v1.0/precipitation (Precipitation for the previous year)</a><br/>"""
+        """<a href="/api/v1.0/2017-01-01/2017-12-31">/api/v1.0/start_date/end_date (Temperature statistics for given date range)</a><br/>"""
+    )
 
 @app.route("/api/v1.0/precipitation")
 def precipitation():
