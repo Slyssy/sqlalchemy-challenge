@@ -62,9 +62,15 @@ def stations():
     return jsonify(station_dict)
 
 
-# @app.route("/api/v1.0/tobs")
+@app.route("/api/v1.0/tobs")
+def tobs():
+    temp_obs = session.query(Measurement.station, func.count(Measurement.tobs))\
+    .group_by(Measurement.station)\
+    .order_by(func.count(Measurement.tobs).desc()).all()
 
-
+    tobs_dict = dict(temp_obs)
+    return jsonify(tobs_dict)
+    
 
 
 
