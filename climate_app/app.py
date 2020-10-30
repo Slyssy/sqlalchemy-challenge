@@ -41,7 +41,8 @@ app = Flask(__name__)
 def home():
     return (
         f"<h1>Welcome to Stephen Lyssy's Hawaii Climate App</h1><br/>"
-        f"<h2>Below is a list of available routes<h2><br/>"
+        f"<h2>Below is a list of available routes<h2>"
+        f"<h4>(You must refresh page everytime you return in order to use the links)</h4><br/>"
         f"<h4>Final year in data's Precipitation Measurements:</h4>"
         """<a href="/api/v1.0/precipitation">/api/v1.0/precipitation </a><br/>"""        
         f"<h4>Most Active stations:</h4>"
@@ -50,7 +51,8 @@ def home():
         """<a href="/api/v1.0/tobs">/api/v1.0/tobs </a><br/>"""
         f"<h4>Temperature statistics for final year's data for my vacation dates (start/end dates):<h4>"
         f"<h6>**Note: If you only enter a start date, statistical data will be for dates greater than or equal to the start date you selected (default is my vaction dates):<h4>"
-        """<a href="/api/v1.0/2017-02-13/2017-02-23">/api/v1.0/start_date/end_date</a><br/>"""
+        """Start: <a href="/api/v1.0/2017-02-13">/api/v1.0/start_date</a><br/>"""
+        """Start/End: <a href="/api/v1.0/2017-02-13/2017-02-23">/api/v1.0/start_date/end_date</a><br/>"""
     )
 
 @app.route("/api/v1.0/precipitation")
@@ -87,30 +89,10 @@ def tobs():
     tobs_list = list(temp_obs)
     return jsonify(tobs_list)
 
-@app.route("/api/v1.0/<start>")
-@app.route("/api/v1.0/startend/<start>/<end>")
-def start_end(start=None,end=None):
-    
-    q = session.query(str(func.min(Measurement.tobs)), str(func.avg(Measurement.tobs)), str(func.max(Measurement.tobs)))
-    
-    if start:
-        q = q.filter(Measurement.date >= start)
-
-    if end:
-        q = q.filter(Measurement.date <= end)
-
-    tobs = q.all()
-    return jsonify([tob.to_dict() for tob in tobs])
-
-    # q = list(np.ravel(q))
-    # return jsonify(q)
-    
-
-
 # @app.route("/api/v1.0/<start>")
-# @app.route("/api/v1.0/<start>/<end>")
-# def start_date(start, end=None):
-
+# @app.route("/api/v1.0/startend/<start>/<end>")
+# def start_end(start=None,end=None):
+    
 #     q = session.query(str(func.min(Measurement.tobs)), str(func.avg(Measurement.tobs)), str(func.max(Measurement.tobs)))
     
 #     if start:
@@ -119,13 +101,33 @@ def start_end(start=None,end=None):
 #     if end:
 #         q = q.filter(Measurement.date <= end)
 
-#     results =q.all()[0]
+#     tobs = q.all()
+#     return jsonify([tob.to_list() for tob in tobs])
 
-#     keys = ["Min_Temp", "Max_Temp", "Avg_Temp"]
+    # q = list(np.ravel(q))
+    # return jsonify(q)
+    
 
-#     tobs_dict = {keys[i]: results[i] for i in range(len(keys))}
 
-#     return jsonify(tobs_dict)
+@app.route("/api/v1.0/<start>")
+@app.route("/api/v1.0/<start>/<end>")
+def start_date(start, end=None):
+
+    q = session.query(str(func.min(Measurement.tobs)), str(func.avg(Measurement.tobs)), str(func.max(Measurement.tobs)))
+    
+    if start:
+        q = q.filter(Measurement.date >= start)
+
+    if end:
+        q = q.filter(Measurement.date <= end)
+
+    results =q.all()[0]
+
+    keys = ["Min_Temp", "Max_Temp", "Avg_Temp"]
+
+    tobs_dict = {keys[i]: results[i] for i in range(len(keys))}
+
+    return jsonify(tobs_dict)
 
 
     
