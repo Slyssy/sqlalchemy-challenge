@@ -54,7 +54,7 @@ def home():
         """Start: <a href="/api/v1.0/2017-02-13">/api/v1.0/start_date</a><br/>"""
         """Start/End: <a href="/api/v1.0/2017-02-13/2017-02-23">/api/v1.0/start_date/end_date</a><br/>"""
     )
-
+# Returns JSON dict of the final year's precipitation data.
 @app.route("/api/v1.0/precipitation")
 def precipitation():
     prcp = session.query(Measurement.date, Measurement.prcp)\
@@ -67,7 +67,7 @@ def precipitation():
 
     return jsonify(prcp_dict)
 
-# Returns a JSON of the most active stations.
+# Returns a JSON list of the most active stations.
 @app.route("/api/v1.0/stations")
 def stations():
     station = session.query(Measurement.station, 
@@ -78,7 +78,7 @@ def stations():
     station_list = list(station)
     return jsonify(station_list)
 
-# Return a JSON list of temperature observations (TOBS) for the previous year for the most active weather station.
+# Returns a JSON list of temperature observations (TOBS) for the previous year for the most active weather station.
 @app.route("/api/v1.0/tobs")
 def tobs():
     temp_obs = session.query(Measurement.date, Measurement.tobs)\
@@ -89,26 +89,7 @@ def tobs():
     tobs_list = list(temp_obs)
     return jsonify(tobs_list)
 
-# @app.route("/api/v1.0/<start>")
-# @app.route("/api/v1.0/startend/<start>/<end>")
-# def start_end(start=None,end=None):
-    
-#     q = session.query(str(func.min(Measurement.tobs)), str(func.avg(Measurement.tobs)), str(func.max(Measurement.tobs)))
-    
-#     if start:
-#         q = q.filter(Measurement.date >= start)
-
-#     if end:
-#         q = q.filter(Measurement.date <= end)
-
-#     tobs = q.all()
-#     return jsonify([tob.to_list() for tob in tobs])
-
-    # q = list(np.ravel(q))
-    # return jsonify(q)
-    
-
-
+# Returns a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start or start-end range.
 @app.route("/api/v1.0/<start>")
 @app.route("/api/v1.0/<start>/<end>")
 def start_date(start, end=None):
@@ -138,16 +119,15 @@ def start_date(start, end=None):
 
     
   
+    # I left this here because this was another way I discovered to create a JSON list, and I wanted to save this code.  
+# @app.route("/api/v1.0/temps/<start>")
+# def temp_start(start=None):
     
-    
-@app.route("/api/v1.0/temps/<start>")
-def temp_start(start=None):
-    
-    start_temps = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
-    filter(Measurement.date >= start).all()
+#     start_temps = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
+#     filter(Measurement.date >= start).all()
 
-    start_temps = list(np.ravel(start_temps))
-    return jsonify(start_temps)
+#     start_temps = list(np.ravel(start_temps))
+#     return jsonify(start_temps)
     
     
 if __name__ == "__main__":
