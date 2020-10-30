@@ -123,12 +123,18 @@ def start_date(start, end=None):
 
     results =q.all()[0]
 
-    keys = ["Min_Temp", "Max_Temp", "Avg_Temp"]
+    results = list(results)
+    return jsonify(results)
 
-    tobs_dict = {keys[i]: results[i] for i in range(len(keys))}
+# I have this commented out, but this actually looks nicer. This return a JSON dict.
+# The homework ask to return a JSON list.
 
-    return jsonify(tobs_dict)
+    # keys = ["Min_Temp", "Max_Temp", "Avg_Temp"]
 
+    # tobs_dict = {keys[i]: results[i] for i in range(len(keys))}
+
+    # return jsonify(tobs_dict)
+   
 
     
   
