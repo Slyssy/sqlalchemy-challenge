@@ -40,12 +40,17 @@ app = Flask(__name__)
 @app.route("/")
 def home():
     return (
-        f"<h1>Welcome to Stephen Lyssy's Hawaii Climate App</h1><br/><br/>"
-        f"<h2> Below is a list of available routes<h2><br/>"
-        """<a href="/api/v1.0/stations">/api/v1.0/stations (List of stations)</a><br/>"""
-        """<a href="/api/v1.0/tobs">/api/v1.0/tobs (Temperature observations for the previous year)</a><br/>"""
-        """<a href="/api/v1.0/precipitation">/api/v1.0/precipitation (Precipitation for the previous year)</a><br/>"""
-        """<a href="/api/v1.0/2017-01-01/2017-12-31">/api/v1.0/start_date/end_date (Temperature statistics for given date range)</a><br/>"""
+        f"<h1>Welcome to Stephen Lyssy's Hawaii Climate App</h1><br/>"
+        f"<h2>Below is a list of available routes<h2><br/>"
+        f"<h4>Final year in data's Precipitation Measurements:</h4>"
+        """<a href="/api/v1.0/precipitation">/api/v1.0/precipitation </a><br/>"""        
+        f"<h4>Most Active stations:</h4>"
+        """<a href="/api/v1.0/stations">/api/v1.0/stations</a><br/>"""
+        f"<h4>Temperature observations for most active weather station from the final year's data:</h4>"
+        """<a href="/api/v1.0/tobs">/api/v1.0/tobs </a><br/>"""
+        f"<h4>Temperature statistics for final year's data for my vacation dates (start/end dates):<h4>"
+        f"<h6>**Note: If you only enter a start date, statistical data will be for dates greater than or equal to the start date you selected (default is my vaction dates):<h4>"
+        """<a href="/api/v1.0/2017-02-13/2017-02-23">/api/v1.0/start_date/end_date</a><br/>"""
     )
 
 @app.route("/api/v1.0/precipitation")
@@ -57,6 +62,7 @@ def precipitation():
     
     # prcp_dict = dict(prcp)
     prcp_dict = {date: precipitation for date, precipitation in prcp}
+
     return jsonify(prcp_dict)
 
 # Returns a JSON of the most active stations.
@@ -67,29 +73,74 @@ def stations():
     .group_by(Measurement.station)\
     .order_by(func.count(Measurement.station).desc()).all()
 
-    station_dict = dict(station)
-    return jsonify(station_dict)
+    station_list = list(station)
+    return jsonify(station_list)
 
-# Return a JSON list of temperature observations (TOBS) for the previous year.
+# Return a JSON list of temperature observations (TOBS) for the previous year for the most active weather station.
 @app.route("/api/v1.0/tobs")
 def tobs():
-    temp_obs = session.query(Measurement.station, func.count(Measurement.tobs))\
-    .group_by(Measurement.station)\
-    .order_by(func.count(Measurement.tobs).desc()).all()
+    temp_obs = session.query(Measurement.date, Measurement.tobs)\
+    .filter(Measurement.station=="USC00519281")\
+    .filter(
+    and_(Measurement.date >= "2016-08-23", Measurement.date <= "2017-08-23")).all()
 
-    tobs_dict = dict(temp_obs)
-    return jsonify(tobs_dict)
+    tobs_list = list(temp_obs)
+    return jsonify(tobs_list)
 
+@app.route("/api/v1.0/<start>")
+@app.route("/api/v1.0/startend/<start>/<end>")
+def start_end(start=None,end=None):
+    
+    q = session.query(str(func.min(Measurement.tobs)), str(func.avg(Measurement.tobs)), str(func.max(Measurement.tobs)))
+    
+    if start:
+        q = q.filter(Measurement.date >= start)
+
+    if end:
+        q = q.filter(Measurement.date <= end)
+
+    tobs = q.all()
+    return jsonify([tob.to_dict() for tob in tobs])
+
+    # q = list(np.ravel(q))
+    # return jsonify(q)
+    
+
+
+# @app.route("/api/v1.0/<start>")
+# @app.route("/api/v1.0/<start>/<end>")
+# def start_date(start, end=None):
+
+#     q = session.query(str(func.min(Measurement.tobs)), str(func.avg(Measurement.tobs)), str(func.max(Measurement.tobs)))
+    
+#     if start:
+#         q = q.filter(Measurement.date >= start)
+
+#     if end:
+#         q = q.filter(Measurement.date <= end)
+
+#     results =q.all()[0]
+
+#     keys = ["Min_Temp", "Max_Temp", "Avg_Temp"]
+
+#     tobs_dict = {keys[i]: results[i] for i in range(len(keys))}
+
+#     return jsonify(tobs_dict)
+
+
+    
+  
+    
+    
 @app.route("/api/v1.0/temps/<start>")
 def temp_start(start=None):
+    
     start_temps = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
     filter(Measurement.date >= start).all()
 
     start_temps = list(np.ravel(start_temps))
     return jsonify(start_temps)
     
-
-
-
+    
 if __name__ == "__main__":
     app.run(debug=True)
