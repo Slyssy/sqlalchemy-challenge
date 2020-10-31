@@ -1,3 +1,12 @@
+### Below are the instuctions for the SQLAlchemy homework assignment. This was a very challenging assignment. In this repository you will find the following items.
+
+* Images Folder: This holds the images that were provided with the homework files.
+* Resources Folder: This folder holds the resource files needed to complete this assignment. For this assignment I only used the SQLite file.
+* climate_app Folder: This holds the pip files as well as the app.py file.
+* climate.ipynb File: This is where I did my climate analysis and and exploration.
+* gitignore File
+* ReadMe File
+___
 # sqlalchemy-challenge
 SQL Alchemy Homework Assignment
 
